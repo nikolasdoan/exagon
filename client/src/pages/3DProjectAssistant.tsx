@@ -8,10 +8,18 @@ const ProjectAssistant = () => {
     projectSetup: boolean;
     teamSetup: boolean;
     toolsComparison: boolean;
+    fileManagement: boolean;
+    versionControl: boolean;
+    progressGraphs: boolean;
+    importExport: boolean;
   }>({
     projectSetup: false,
     teamSetup: false,
-    toolsComparison: false
+    toolsComparison: false,
+    fileManagement: false,
+    versionControl: false,
+    progressGraphs: false,
+    importExport: false
   });
 
   // Function to update UI based on user input triggers
@@ -22,6 +30,14 @@ const ProjectAssistant = () => {
       setVisibleUI({ ...visibleUI, projectSetup: true, teamSetup: true });
     } else if (uiType === 'toolsComparison') {
       setVisibleUI({ ...visibleUI, projectSetup: true, toolsComparison: true });
+    } else if (uiType === 'fileManagement') {
+      setVisibleUI({ ...visibleUI, projectSetup: true, fileManagement: true });
+    } else if (uiType === 'versionControl') {
+      setVisibleUI({ ...visibleUI, projectSetup: true, versionControl: true });
+    } else if (uiType === 'progressGraphs') {
+      setVisibleUI({ ...visibleUI, projectSetup: true, progressGraphs: true });
+    } else if (uiType === 'importExport') {
+      setVisibleUI({ ...visibleUI, projectSetup: true, importExport: true });
     }
   };
 

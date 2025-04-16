@@ -118,7 +118,8 @@ const ChatInterface = ({ updateUI }: ChatInterfaceProps) => {
             </button>
           </div>
           <div className="text-xs text-gray-500 mt-2">
-            Try: "Object, textures, animation" to see the project setup
+            Try these commands: "Object, textures, animation", "team members", "compare tools", 
+            "file management", "version control", "progress graphs", "import export"
           </div>
         </div>
       </div>
