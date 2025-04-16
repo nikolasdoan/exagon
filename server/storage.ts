@@ -117,23 +117,26 @@ export class DatabaseStorage implements IStorage {
   
   async deleteProject(id: number): Promise<boolean> {
     const result = await db.delete(projects).where(eq(projects.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // Project Member operations
   async getProjectMembers(projectId: number): Promise<(ProjectMember & { user: User })[]> {
-    const result = await db.select({
-      ...projectMembers,
-      user: users
-    })
-    .from(projectMembers)
-    .innerJoin(users, eq(projectMembers.userId, users.id))
-    .where(eq(projectMembers.projectId, projectId));
+    const members = await db.select().from(projectMembers).where(eq(projectMembers.projectId, projectId));
     
-    return result.map(r => ({
-      ...r.projectMembers,
-      user: r.user
-    })) as (ProjectMember & { user: User })[];
+    const membersWithUsers: (ProjectMember & { user: User })[] = [];
+    
+    for (const member of members) {
+      const [user] = await db.select().from(users).where(eq(users.id, member.userId));
+      if (user) {
+        membersWithUsers.push({
+          ...member,
+          user
+        });
+      }
+    }
+    
+    return membersWithUsers;
   }
   
   async addProjectMember(member: InsertProjectMember): Promise<ProjectMember> {
@@ -150,7 +153,7 @@ export class DatabaseStorage implements IStorage {
           eq(projectMembers.userId, userId)
         )
       );
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // Milestone operations
@@ -183,21 +186,23 @@ export class DatabaseStorage implements IStorage {
   
   async deleteMilestone(id: number): Promise<boolean> {
     const result = await db.delete(milestones).where(eq(milestones.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // Task operations
   async getTasks(projectId: number, milestoneId?: number): Promise<Task[]> {
-    let query = db
-      .select()
-      .from(tasks)
-      .where(eq(tasks.projectId, projectId));
+    let baseQuery = db.select().from(tasks).where(eq(tasks.projectId, projectId));
       
     if (milestoneId) {
-      query = query.where(eq(tasks.milestoneId, milestoneId));
+      return db.select().from(tasks).where(
+        and(
+          eq(tasks.projectId, projectId),
+          eq(tasks.milestoneId, milestoneId)
+        )
+      ).orderBy(tasks.dueDate);
     }
     
-    return query.orderBy(tasks.dueDate);
+    return baseQuery.orderBy(tasks.dueDate);
   }
   
   async getTask(id: number): Promise<Task | undefined> {
@@ -221,23 +226,32 @@ export class DatabaseStorage implements IStorage {
   
   async deleteTask(id: number): Promise<boolean> {
     const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // Folder operations
   async getFolders(projectId: number, parentId?: number): Promise<Folder[]> {
-    let query = db
-      .select()
-      .from(folders)
-      .where(eq(folders.projectId, projectId));
-      
     if (parentId) {
-      query = query.where(eq(folders.parentId, parentId));
+      return db.select()
+        .from(folders)
+        .where(
+          and(
+            eq(folders.projectId, projectId),
+            eq(folders.parentId, parentId)
+          )
+        )
+        .orderBy(folders.name);
     } else {
-      query = query.where(isNull(folders.parentId));
+      return db.select()
+        .from(folders)
+        .where(
+          and(
+            eq(folders.projectId, projectId),
+            isNull(folders.parentId)
+          )
+        )
+        .orderBy(folders.name);
     }
-    
-    return query.orderBy(folders.name);
   }
   
   async getFolder(id: number): Promise<Folder | undefined> {
@@ -261,23 +275,32 @@ export class DatabaseStorage implements IStorage {
   
   async deleteFolder(id: number): Promise<boolean> {
     const result = await db.delete(folders).where(eq(folders.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // File operations
   async getFiles(projectId: number, folderId?: number): Promise<File[]> {
-    let query = db
-      .select()
-      .from(files)
-      .where(eq(files.projectId, projectId));
-      
     if (folderId) {
-      query = query.where(eq(files.folderId, folderId));
+      return db.select()
+        .from(files)
+        .where(
+          and(
+            eq(files.projectId, projectId),
+            eq(files.folderId, folderId)
+          )
+        )
+        .orderBy(files.name);
     } else {
-      query = query.where(isNull(files.folderId));
+      return db.select()
+        .from(files)
+        .where(
+          and(
+            eq(files.projectId, projectId),
+            isNull(files.folderId)
+          )
+        )
+        .orderBy(files.name);
     }
-    
-    return query.orderBy(files.name);
   }
   
   async getFile(id: number): Promise<File | undefined> {
@@ -301,7 +324,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteFile(id: number): Promise<boolean> {
     const result = await db.delete(files).where(eq(files.id, id));
-    return result.rowCount > 0;
+    return result.rowCount !== null && result.rowCount > 0;
   }
   
   // File Version operations
