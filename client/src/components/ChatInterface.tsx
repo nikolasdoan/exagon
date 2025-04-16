@@ -66,61 +66,69 @@ const ChatInterface = ({ updateUI }: ChatInterfaceProps) => {
   };
 
   return (
-    <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="flex flex-col h-full">
-        {/* Chat Header */}
-        <div className="p-4 border-b border-gray-200">
+    <div className="h-full flex flex-col bg-white">
+      {/* Chat Header */}
+      <div className="p-3 border-b border-gray-200">
+        <div className="flex items-center justify-between">
           <div className="flex items-center">
             <span className="material-icons text-primary mr-2">smart_toy</span>
-            <h2 className="font-medium text-gray-800">Assistant Chat</h2>
+            <h2 className="font-medium text-gray-800">AI Assistant</h2>
           </div>
-        </div>
-        
-        {/* Conversation Area */}
-        <div 
-          ref={conversationRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4 h-[480px]"
-        >
-          {messages.map((message, index) => (
-            <div 
-              key={index} 
-              className={`message-container flex ${message.sender === 'user' ? 'justify-end' : ''}`}
-            >
-              <div 
-                className={`message max-w-[80%] ${
-                  message.sender === 'user' 
-                    ? 'bg-[#e3f2fd]' 
-                    : 'bg-[#f5f5f5]'
-                } rounded-lg p-3 text-gray-800`}
-              >
-                <p>{message.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Input Area */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex">
-            <input 
-              type="text" 
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeypress}
-              className="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              placeholder="Type your message..."
-            />
-            <button 
-              onClick={handleSend}
-              className="bg-primary text-white px-4 py-2 rounded-r-lg hover:bg-blue-600 transition-colors"
-            >
-              <span className="material-icons">send</span>
+          <div className="flex space-x-2">
+            <button className="text-gray-500 hover:text-gray-800">
+              <span className="material-icons text-sm">settings</span>
+            </button>
+            <button className="text-gray-500 hover:text-gray-800">
+              <span className="material-icons text-sm">help_outline</span>
             </button>
           </div>
-          <div className="text-xs text-gray-500 mt-2">
-            Try these commands: "Object, textures, animation", "team members", "compare tools", 
-            "file management", "version control", "progress graphs", "import export"
+        </div>
+      </div>
+      
+      {/* Conversation Area */}
+      <div 
+        ref={conversationRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
+      >
+        {messages.map((message, index) => (
+          <div 
+            key={index} 
+            className={`message-container flex ${message.sender === 'user' ? 'justify-end' : ''}`}
+          >
+            <div 
+              className={`message max-w-[85%] ${
+                message.sender === 'user' 
+                  ? 'bg-primary text-white' 
+                  : 'bg-white border border-gray-200 shadow-sm'
+              } rounded-lg p-3 text-sm`}
+            >
+              <p>{message.text}</p>
+            </div>
           </div>
+        ))}
+      </div>
+      
+      {/* Input Area */}
+      <div className="p-3 border-t border-gray-200 bg-white">
+        <div className="flex">
+          <input 
+            type="text" 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeypress}
+            className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            placeholder="Type your message..."
+          />
+          <button 
+            onClick={handleSend}
+            className="bg-primary text-white px-3 py-2 rounded-r-lg hover:bg-blue-600 transition-colors"
+          >
+            <span className="material-icons text-sm">send</span>
+          </button>
+        </div>
+        <div className="text-xs text-gray-500 mt-2">
+          Try these commands: "Object, textures, animation", "team members", "compare tools", 
+          "file management", "version control", "progress graphs", "import export"
         </div>
       </div>
     </div>

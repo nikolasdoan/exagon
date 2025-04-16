@@ -107,7 +107,7 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
         )}
         
         {/* Team Members Card */}
-        {teamSetup && (
+        {showTeamSetup && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
             <h3 className="font-semibold text-gray-800 mb-4">Team Members</h3>
             <div className="space-y-3">
@@ -133,7 +133,7 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
         )}
         
         {/* Tools Comparison Card */}
-        {toolsComparison && (
+        {showToolsComparison && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
             <h3 className="font-semibold text-gray-800 mb-4">Tools Comparison</h3>
             <div className="overflow-x-auto">
@@ -168,7 +168,7 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
         )}
         
         {/* File Management Card */}
-        {fileManagement && (
+        {showFileManagement && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-800">File Management</h3>
@@ -228,7 +228,7 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
         )}
         
         {/* Version Control Card */}
-        {versionControl && (
+        {showVersionControl && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
             <h3 className="font-semibold text-gray-800 mb-4">Version Control</h3>
             
@@ -285,7 +285,7 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
         )}
         
         {/* Progress Graphs Card */}
-        {progressGraphs && (
+        {showProgressGraphs && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
             <h3 className="font-semibold text-gray-800 mb-4">Project Analytics</h3>
             
@@ -338,7 +338,7 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
         )}
         
         {/* Import/Export Card */}
-        {importExport && (
+        {showImportExport && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
             <h3 className="font-semibold text-gray-800 mb-4">Import & Export Options</h3>
             
