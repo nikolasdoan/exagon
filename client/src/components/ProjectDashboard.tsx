@@ -11,9 +11,10 @@ interface ProjectDashboardProps {
     progressGraphs: boolean;
     importExport: boolean;
   };
+  activeTab?: 'project' | 'team' | 'tools' | 'files' | 'versions' | 'graphs' | 'importExport' | '3dView';
 }
 
-const ProjectDashboard = ({ visibleUI }: ProjectDashboardProps) => {
+const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboardProps) => {
   const { 
     projectSetup, 
     teamSetup, 
@@ -24,22 +25,45 @@ const ProjectDashboard = ({ visibleUI }: ProjectDashboardProps) => {
     importExport 
   } = visibleUI;
   
-  const showEmptyState = !projectSetup && !teamSetup && !toolsComparison && 
-    !fileManagement && !versionControl && !progressGraphs && !importExport;
+  // Determine what to show based on the active tab
+  const showProjectSetup = activeTab === 'project' && projectSetup;
+  const showTeamSetup = activeTab === 'team' && teamSetup;
+  const showToolsComparison = activeTab === 'tools' && toolsComparison;
+  const showFileManagement = activeTab === 'files' && fileManagement;
+  const showVersionControl = activeTab === 'versions' && versionControl;
+  const showProgressGraphs = activeTab === 'graphs' && progressGraphs;
+  const showImportExport = activeTab === 'importExport' && importExport;
+  
+  const showEmptyState = !showProjectSetup && !showTeamSetup && !showToolsComparison && 
+    !showFileManagement && !showVersionControl && !showProgressGraphs && !showImportExport;
+
+  // Get the title for the panel based on active tab
+  const getPanelTitle = () => {
+    switch(activeTab) {
+      case 'project': return 'Project Dashboard';
+      case 'team': return 'Team Management';
+      case 'tools': return 'Tools Comparison';
+      case 'files': return 'File Management';
+      case 'versions': return 'Version Control';
+      case 'graphs': return 'Project Analytics';
+      case 'importExport': return 'Import & Export';
+      default: return 'Project Dashboard';
+    }
+  };
 
   return (
-    <div className="lg:w-2/5 bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="h-full bg-white overflow-hidden flex flex-col">
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <span className="material-icons text-primary mr-2">dashboard</span>
-            <h2 className="font-medium text-gray-800">Project Dashboard</h2>
+            <h2 className="font-medium text-gray-800">{getPanelTitle()}</h2>
           </div>
           <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">Live Preview</span>
         </div>
       </div>
       
-      <div className="p-4 space-y-6 h-[530px] overflow-y-auto">
+      <div className="p-4 space-y-6 flex-1 overflow-y-auto">
         {/* Empty State */}
         {showEmptyState && (
           <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
@@ -50,7 +74,7 @@ const ProjectDashboard = ({ visibleUI }: ProjectDashboardProps) => {
         )}
         
         {/* Project Setup Card */}
-        {projectSetup && (
+        {showProjectSetup && (
           <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-800">Project: Sci-Fi Robot</h3>
