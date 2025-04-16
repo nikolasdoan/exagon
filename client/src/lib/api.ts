@@ -1,42 +1,49 @@
-import { apiRequest, getQueryFn, queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
 import { Project, Milestone, Task, User, ProjectMember, Folder, File, FileVersion, Comment } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 
 // Project APIs
 export const useProjects = () => {
-  return getQueryFn<Project[]>({ 
-    queryKey: ["/api/projects"],
-    on401: "returnNull" 
+  return useQuery({ 
+    queryKey: ["/api/projects"] 
   });
 };
 
 export const useProject = (id: number) => {
-  return getQueryFn<Project>({ 
-    queryKey: ["/api/projects", id],
-    on401: "returnNull" 
+  return useQuery({ 
+    queryKey: ["/api/projects", id]
   });
 };
 
 export const createProject = async (project: Omit<Project, "id" | "createdAt" | "updatedAt">) => {
-  const result = await apiRequest("/api/projects", {
+  const result = await fetch("/api/projects", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(project),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
   return result;
 };
 
 export const updateProject = async (id: number, project: Partial<Omit<Project, "id" | "createdAt" | "updatedAt">>) => {
-  const result = await apiRequest(`/api/projects/${id}`, {
+  const result = await fetch(`/api/projects/${id}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(project),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects", id] });
   queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
   return result;
 };
 
 export const deleteProject = async (id: number) => {
-  await apiRequest(`/api/projects/${id}`, {
+  await fetch(`/api/projects/${id}`, {
     method: "DELETE",
   });
   queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -44,39 +51,46 @@ export const deleteProject = async (id: number) => {
 
 // User APIs
 export const useUser = (id: number) => {
-  return getQueryFn<User>({ 
-    queryKey: ["/api/users", id],
-    on401: "returnNull" 
+  return useQuery({ 
+    queryKey: ["/api/users", id]
   });
 };
 
 export const createUser = async (user: Omit<User, "id">) => {
-  const result = await apiRequest("/api/users", {
+  const result = await fetch("/api/users", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(user),
-  });
+  }).then(res => res.json());
+  
   return result;
 };
 
 // Project Members APIs
 export const useProjectMembers = (projectId: number) => {
-  return getQueryFn<(ProjectMember & { user: User })[]>({ 
+  return useQuery({ 
     queryKey: ["/api/projects", projectId, "members"],
-    on401: "returnNull" 
+    enabled: !!projectId
   });
 };
 
 export const addProjectMember = async (projectId: number, userId: number, role: string) => {
-  const result = await apiRequest(`/api/projects/${projectId}/members`, {
+  const result = await fetch(`/api/projects/${projectId}/members`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ userId, role }),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "members"] });
   return result;
 };
 
 export const removeProjectMember = async (projectId: number, userId: number) => {
-  await apiRequest(`/api/projects/${projectId}/members/${userId}`, {
+  await fetch(`/api/projects/${projectId}/members/${userId}`, {
     method: "DELETE",
   });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "members"] });
@@ -84,32 +98,40 @@ export const removeProjectMember = async (projectId: number, userId: number) => 
 
 // Milestone APIs
 export const useMilestones = (projectId: number) => {
-  return getQueryFn<Milestone[]>({ 
+  return useQuery({ 
     queryKey: ["/api/projects", projectId, "milestones"],
-    on401: "returnNull" 
+    enabled: !!projectId
   });
 };
 
 export const createMilestone = async (projectId: number, milestone: Omit<Milestone, "id" | "projectId" | "createdAt" | "updatedAt">) => {
-  const result = await apiRequest(`/api/projects/${projectId}/milestones`, {
+  const result = await fetch(`/api/projects/${projectId}/milestones`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ ...milestone, projectId }),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "milestones"] });
   return result;
 };
 
 export const updateMilestone = async (id: number, milestone: Partial<Omit<Milestone, "id" | "projectId" | "createdAt" | "updatedAt">>) => {
-  const result = await apiRequest(`/api/milestones/${id}`, {
+  const result = await fetch(`/api/milestones/${id}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(milestone),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/milestones", id] });
   return result;
 };
 
 export const deleteMilestone = async (id: number, projectId: number) => {
-  await apiRequest(`/api/milestones/${id}`, {
+  await fetch(`/api/milestones/${id}`, {
     method: "DELETE",
   });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "milestones"] });
@@ -121,17 +143,21 @@ export const useTasks = (projectId: number, milestoneId?: number) => {
     ? ["/api/projects", projectId, "tasks", { milestoneId }] 
     : ["/api/projects", projectId, "tasks"];
     
-  return getQueryFn<Task[]>({ 
+  return useQuery({ 
     queryKey,
-    on401: "returnNull" 
+    enabled: !!projectId
   });
 };
 
 export const createTask = async (projectId: number, task: Omit<Task, "id" | "projectId" | "createdAt" | "updatedAt">) => {
-  const result = await apiRequest(`/api/projects/${projectId}/tasks`, {
+  const result = await fetch(`/api/projects/${projectId}/tasks`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ ...task, projectId }),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "tasks"] });
   if (task.milestoneId) {
     queryClient.invalidateQueries({ 
@@ -142,10 +168,14 @@ export const createTask = async (projectId: number, task: Omit<Task, "id" | "pro
 };
 
 export const updateTask = async (id: number, task: Partial<Omit<Task, "id" | "projectId" | "createdAt" | "updatedAt">>, projectId: number) => {
-  const result = await apiRequest(`/api/tasks/${id}`, {
+  const result = await fetch(`/api/tasks/${id}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(task),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/tasks", id] });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "tasks"] });
   if (task.milestoneId) {
@@ -157,7 +187,7 @@ export const updateTask = async (id: number, task: Partial<Omit<Task, "id" | "pr
 };
 
 export const deleteTask = async (id: number, projectId: number, milestoneId?: number) => {
-  await apiRequest(`/api/tasks/${id}`, {
+  await fetch(`/api/tasks/${id}`, {
     method: "DELETE",
   });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "tasks"] });
@@ -174,17 +204,21 @@ export const useFolders = (projectId: number, parentId?: number) => {
     ? ["/api/projects", projectId, "folders", { parentId }] 
     : ["/api/projects", projectId, "folders"];
     
-  return getQueryFn<Folder[]>({ 
+  return useQuery({ 
     queryKey,
-    on401: "returnNull" 
+    enabled: !!projectId
   });
 };
 
 export const createFolder = async (projectId: number, folder: Omit<Folder, "id" | "projectId" | "createdAt" | "updatedAt">) => {
-  const result = await apiRequest(`/api/projects/${projectId}/folders`, {
+  const result = await fetch(`/api/projects/${projectId}/folders`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ ...folder, projectId }),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "folders"] });
   if (folder.parentId) {
     queryClient.invalidateQueries({ 
@@ -195,17 +229,21 @@ export const createFolder = async (projectId: number, folder: Omit<Folder, "id" 
 };
 
 export const updateFolder = async (id: number, folder: Partial<Omit<Folder, "id" | "projectId" | "createdAt" | "updatedAt">>, projectId: number) => {
-  const result = await apiRequest(`/api/folders/${id}`, {
+  const result = await fetch(`/api/folders/${id}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(folder),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/folders", id] });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "folders"] });
   return result;
 };
 
 export const deleteFolder = async (id: number, projectId: number) => {
-  await apiRequest(`/api/folders/${id}`, {
+  await fetch(`/api/folders/${id}`, {
     method: "DELETE",
   });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "folders"] });
@@ -217,17 +255,21 @@ export const useFiles = (projectId: number, folderId?: number) => {
     ? ["/api/projects", projectId, "files", { folderId }] 
     : ["/api/projects", projectId, "files"];
     
-  return getQueryFn<File[]>({ 
+  return useQuery({ 
     queryKey,
-    on401: "returnNull" 
+    enabled: !!projectId
   });
 };
 
 export const createFile = async (projectId: number, file: Omit<File, "id" | "projectId" | "createdAt" | "updatedAt">) => {
-  const result = await apiRequest(`/api/projects/${projectId}/files`, {
+  const result = await fetch(`/api/projects/${projectId}/files`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ ...file, projectId }),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "files"] });
   if (file.folderId) {
     queryClient.invalidateQueries({ 
@@ -238,17 +280,21 @@ export const createFile = async (projectId: number, file: Omit<File, "id" | "pro
 };
 
 export const updateFile = async (id: number, file: Partial<Omit<File, "id" | "projectId" | "createdAt" | "updatedAt">>, projectId: number) => {
-  const result = await apiRequest(`/api/files/${id}`, {
+  const result = await fetch(`/api/files/${id}`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(file),
-  });
+  }).then(res => res.json());
+  
   queryClient.invalidateQueries({ queryKey: ["/api/files", id] });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "files"] });
   return result;
 };
 
 export const deleteFile = async (id: number, projectId: number) => {
-  await apiRequest(`/api/files/${id}`, {
+  await fetch(`/api/files/${id}`, {
     method: "DELETE",
   });
   queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "files"] });
@@ -256,32 +302,35 @@ export const deleteFile = async (id: number, projectId: number) => {
 
 // File Versions APIs
 export const useFileVersions = (fileId: number) => {
-  return getQueryFn<FileVersion[]>({ 
+  return useQuery({ 
     queryKey: ["/api/files", fileId, "versions"],
-    on401: "returnNull" 
+    enabled: !!fileId
   });
 };
 
 // Comments APIs
 export const useTaskComments = (taskId: number) => {
-  return getQueryFn<Comment[]>({ 
+  return useQuery({ 
     queryKey: ["/api/tasks", taskId, "comments"],
-    on401: "returnNull" 
+    enabled: !!taskId
   });
 };
 
 export const useFileComments = (fileId: number) => {
-  return getQueryFn<Comment[]>({ 
+  return useQuery({ 
     queryKey: ["/api/files", fileId, "comments"],
-    on401: "returnNull" 
+    enabled: !!fileId
   });
 };
 
 export const createComment = async (comment: Omit<Comment, "id" | "createdAt" | "updatedAt">) => {
-  const result = await apiRequest("/api/comments", {
+  const result = await fetch("/api/comments", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(comment),
-  });
+  }).then(res => res.json());
   
   if (comment.taskId) {
     queryClient.invalidateQueries({ queryKey: ["/api/tasks", comment.taskId, "comments"] });
@@ -295,7 +344,7 @@ export const createComment = async (comment: Omit<Comment, "id" | "createdAt" | 
 };
 
 export const deleteComment = async (id: number, taskId?: number, fileId?: number) => {
-  await apiRequest(`/api/comments/${id}`, {
+  await fetch(`/api/comments/${id}`, {
     method: "DELETE",
   });
   

@@ -4,13 +4,53 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/ui/date-picker";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+
+interface DatePickerProps {
+  date?: Date;
+  setDate: (date?: Date) => void;
+}
+
+function DatePicker({ date, setDate }: DatePickerProps) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant={"outline"}
+          className={cn(
+            "w-full justify-start text-left font-normal",
+            !date && "text-muted-foreground"
+          )}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {date ? format(date, "PPP") : <span>Pick a date</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0">
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={setDate}
+          initialFocus
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
 import { useToast } from "@/hooks/use-toast";
 
 export function ProjectsApi() {
@@ -45,7 +85,9 @@ export function ProjectsApi() {
       await createProject({
         name: newProjectName,
         description: newProjectDescription,
-        status: "active"
+        status: "active",
+        startDate: new Date(),
+        endDate: null
       });
 
       toast({
@@ -140,8 +182,9 @@ export function ProjectsApi() {
     try {
       await createMilestone(selectedProjectId, {
         name: newMilestoneName,
-        deadline: newMilestoneDeadline,
-        status: "pending"
+        dueDate: newMilestoneDeadline,
+        description: "Created via API demo",
+        completed: false
       });
 
       toast({
@@ -311,9 +354,11 @@ export function ProjectsApi() {
                       >
                         <div className="font-medium">{milestone.name}</div>
                         <div className="text-sm text-gray-600">
-                          Deadline: {new Date(milestone.deadline).toLocaleDateString()}
+                          Deadline: {milestone.dueDate ? new Date(milestone.dueDate).toLocaleDateString() : 'Not set'}
                         </div>
-                        <div className="text-xs mt-1 text-gray-500">Status: {milestone.status}</div>
+                        <div className="text-xs mt-1 text-gray-500">
+                          Status: {milestone.completed ? 'Completed' : 'In progress'}
+                        </div>
                       </div>
                     ))}
                     

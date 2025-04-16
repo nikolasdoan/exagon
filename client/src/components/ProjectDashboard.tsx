@@ -1,5 +1,9 @@
 import { Card } from "@/components/ui/card";
 import GanttChart from "@/components/ui/gantt-chart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProjectsApi } from "@/components/ProjectsApi";
+import { FilesApi } from "@/components/FilesApi";
+import { VersionsApi } from "@/components/VersionsApi";
 
 interface ProjectDashboardProps {
   visibleUI: {
@@ -33,6 +37,9 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
   const showVersionControl = activeTab === 'versions' && versionControl;
   const showProgressGraphs = activeTab === 'graphs' && progressGraphs;
   const showImportExport = activeTab === 'importExport' && importExport;
+  
+  // Add a flag to show API components for demonstration
+  const showApiComponents = true;
   
   const showEmptyState = !showProjectSetup && !showTeamSetup && !showToolsComparison && 
     !showFileManagement && !showVersionControl && !showProgressGraphs && !showImportExport;
@@ -399,6 +406,36 @@ const ProjectDashboard = ({ visibleUI, activeTab = 'project' }: ProjectDashboard
                 </button>
               </div>
             </div>
+          </div>
+        )}
+        
+        {/* API Component Demonstrations */}
+        {showApiComponents && (
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 mb-6">
+            <h3 className="font-semibold text-gray-800 mb-4">API Endpoints & Database Demo</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Test the PostgreSQL database functionality directly from the UI. Create projects, files, and track versions.
+            </p>
+            
+            <Tabs defaultValue="projects" className="mt-5">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="projects">Projects & Team</TabsTrigger>
+                <TabsTrigger value="files">File Management</TabsTrigger>
+                <TabsTrigger value="versions">Version Control</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="projects" className="mt-4">
+                <ProjectsApi />
+              </TabsContent>
+              
+              <TabsContent value="files" className="mt-4">
+                <FilesApi />
+              </TabsContent>
+              
+              <TabsContent value="versions" className="mt-4">
+                <VersionsApi />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>
