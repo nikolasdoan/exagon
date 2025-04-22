@@ -1,4 +1,4 @@
-# TechVisualize3D
+# Exagon
 
 A project management application with 3D visualization capabilities.
 
